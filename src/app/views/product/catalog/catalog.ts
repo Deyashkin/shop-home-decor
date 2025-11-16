@@ -1,27 +1,32 @@
 import {Component} from '@angular/core';
+import {debounceTime} from 'rxjs';
 import {ActivatedRoute, Router} from '@angular/router';
 import {
   ProductCard
 } from '../../../shared/components/product-card/product-card';
-import {ProductService} from '../../../shared/services/product.service';
-import type {ProductType} from '../../../../types/product.type';
-import type {
-  ProductResponseType
-} from '../../../../types/product-response.type';
-import {CategoryService} from '../../../shared/services/category.service';
-import type {
-  CategoryWithTypeType
-} from '../../../../types/category-with-type.type';
 import {
   CategoryFilter
 } from '../../../shared/components/category-filter/category-filter';
 import {ActiveParamsUtil} from '../../../shared/utils/active-params-util';
-import type {ActiveParamsType} from '../../../../types/active-params.type';
-import type {AppliedFilterType} from '../../../../types/applied-filter.type';
-import {debounceTime} from 'rxjs';
 import {CartService} from '../../../shared/services/cart.service';
+import {ProductService} from '../../../shared/services/product.service';
+import {CategoryService} from '../../../shared/services/category.service';
+import {FavoriteService} from '../../../shared/services/favorite.service';
+import {AuthService} from '../../../core/auth/auth.service';
+import type {
+  CategoryWithTypeType
+} from '../../../../types/category-with-type.type';
+import type {ProductType} from '../../../../types/product.type';
+import type {AppliedFilterType} from '../../../../types/applied-filter.type';
+import type {ActiveParamsType} from '../../../../types/active-params.type';
 import type {CartType} from '../../../../types/cart.type';
-import type {Cart} from '../../order/cart/cart';
+import type {
+  ProductResponseType
+} from '../../../../types/product-response.type';
+import type {FavoriteType} from '../../../../types/favorite.type';
+import type {
+  DefaultResponseType
+} from '../../../../types/default-response.type';
 
 @Component({
   selector: 'app-catalog',
@@ -45,20 +50,79 @@ export class Catalog {
   ];
   pages: number[] = [];
   cart: CartType | null = null;
+  favoriteProducts: FavoriteType[] | null = null;
 
   constructor(private productService: ProductService,
               private categoryService: CategoryService,
               private activatedRoute: ActivatedRoute,
               private cartService: CartService,
-              private router: Router) {
+              private router: Router,
+              private favoriteService: FavoriteService,
+              private authService: AuthService,) {
   };
 
   ngOnInit() {
     this.cartService.getCart()
-      .subscribe((data: CartType) => {
-        this.cart = data;
-      })
+      .subscribe((data: CartType | DefaultResponseType) => {
+        if ((data as DefaultResponseType).error !== undefined) {
+          throw new Error((data as DefaultResponseType).message);
+        }
+        this.cart = data as CartType;
 
+        // Убираем загрузку избранного для незалогиненных пользователей
+        if (this.authService.getIsLoggedIn()) {
+          this.favoriteService.getFavorites()
+            .subscribe(
+              {
+                next: (data: FavoriteType[] | DefaultResponseType) => {
+                  if ((data as DefaultResponseType).error !== undefined) {
+                    const error = (data as DefaultResponseType).message;
+                    this.processCatalog();
+                    throw new Error(error);
+                  }
+
+                  this.favoriteProducts = data as FavoriteType[];
+                  this.processCatalog();
+                },
+                error: (error) => {
+                  this.processCatalog();
+                }
+              }
+            );
+        } else {
+          // Для незалогиненных сразу обрабатываем каталог без избранного
+          this.favoriteProducts = null;
+          this.processCatalog();
+        }
+
+        if (this.authService.getIsLoggedIn()) {
+          this.favoriteService.getFavorites()
+            .subscribe(
+              {
+                next: (data: FavoriteType[] | DefaultResponseType) => {
+                  if ((data as DefaultResponseType).error !== undefined) {
+                    const error = (data as DefaultResponseType).message;
+                    this.processCatalog();
+                    throw new Error(error);
+                  }
+
+                  this.favoriteProducts = data as FavoriteType[];
+                  this.processCatalog();
+                },
+                error: (error) => {
+                  this.processCatalog();
+                }
+              }
+            );
+        } else {
+          this.processCatalog();
+        }
+
+
+      });
+  }
+
+  processCatalog() {
     this.categoryService.getCategoriesWithTypes()
       .subscribe(data => {
         this.categoriesWithTypes = data;
@@ -131,10 +195,20 @@ export class Catalog {
                 } else {
                   this.products = data.items;
                 }
+
+                if (this.favoriteProducts) {
+                  this.products = this.products.map(product => {
+                    const productInFavorite = this.favoriteProducts?.find(item => item.id === product.id);
+                    if (productInFavorite) {
+                      product.isInFavorite = true;
+                    }
+                    return product;
+                  })
+                }
+
               });
           });
       })
-
   }
 
   trackByFilter(index: number, filter: any): any {

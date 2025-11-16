@@ -26,7 +26,7 @@ export const routes: Routes = [
       {path: 'order', component: Order},
       {path: 'favorite', component: Favorite, canActivate: [AuthGuard]},
       {path: 'orders', component: Orders, canActivate: [AuthGuard]},
-      {path: 'info', component: Info, canActivate: [AuthGuard]},
+      {path: 'profile', component: Info, canActivate: [AuthGuard]},
     ]
   },
 

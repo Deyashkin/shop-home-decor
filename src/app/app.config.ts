@@ -3,7 +3,6 @@ import {
   provideBrowserGlobalErrorListeners,
   provideZoneChangeDetection
 } from '@angular/core';
-import {provideRouter} from '@angular/router';
 import {routes} from './app.routes';
 import {provideHttpClient, withInterceptorsFromDi} from '@angular/common/http';
 import {
@@ -11,6 +10,7 @@ import {
   MatSnackBarModule
 } from '@angular/material/snack-bar';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
+import {provideRouter, withInMemoryScrolling} from '@angular/router';
 
 
 
@@ -18,9 +18,15 @@ import { provideAnimationsAsync } from '@angular/platform-browser/animations/asy
 
 export const appConfig: ApplicationConfig = {
   providers: [
+    provideRouter(
+      routes,
+      withInMemoryScrolling({
+        anchorScrolling: 'enabled',
+        scrollPositionRestoration: 'enabled'
+      })
+    ),
     provideBrowserGlobalErrorListeners(),
     provideZoneChangeDetection({eventCoalescing: true}),
-    provideRouter(routes),
     provideHttpClient(withInterceptorsFromDi()),
     importProvidersFrom(MatSnackBarModule),
     provideAnimationsAsync(),

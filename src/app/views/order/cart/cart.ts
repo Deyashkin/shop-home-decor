@@ -11,6 +11,9 @@ import type {ProductType} from '../../../../types/product.type';
 import type {CartType} from '../../../../types/cart.type';
 import {environment} from '../../../../environments/environment';
 import {count} from 'rxjs';
+import type {
+  DefaultResponseType
+} from '../../../../types/default-response.type';
 
 @Component({
   selector: 'cart',
@@ -21,7 +24,10 @@ import {count} from 'rxjs';
 })
 export class Cart {
 
-  constructor(private productService: ProductService, private cartService: CartService) {
+  constructor(
+    private productService: ProductService,
+    private cartService: CartService,
+    ) {
   }
 
   extraProducts: ProductType[] = [];
@@ -64,8 +70,12 @@ export class Cart {
       });
 
     this.cartService.getCart()
-      .subscribe((data: CartType) => {
-        this.cart = data;
+      .subscribe((data: CartType | DefaultResponseType ) => {
+
+        if ((data as DefaultResponseType).error !== undefined) {
+          throw new Error((data as DefaultResponseType).message);
+        }
+        this.cart = data as CartType;
         this.calculateTotal();
       })
   }
@@ -84,8 +94,12 @@ export class Cart {
   updateCount(id: string, count: number)  {
     if (this.cart) {
       this.cartService.updateCart(id, count)
-        .subscribe((data: CartType) => {
-          this.cart = data;
+        .subscribe((data: CartType | DefaultResponseType) => {
+          if ((data as DefaultResponseType).error !== undefined) {
+            throw new Error((data as DefaultResponseType).message);
+          }
+
+          this.cart = (data as CartType);
           this.calculateTotal();
         })
     }

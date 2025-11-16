@@ -1,4 +1,4 @@
-import {Component, inject} from '@angular/core';
+import {Component, inject,} from '@angular/core';
 import {Router, RouterLink} from '@angular/router';
 import {
   FormBuilder,
@@ -12,7 +12,6 @@ import {NgStyle} from '@angular/common';
 import {
   PasswordRepeatDirective
 } from '../../../shared/directives/password-repeat.directive';
-import {subscribeOn} from 'rxjs';
 import type {LoginResponseType} from '../../../../types/login-response.type';
 import type {HttpErrorResponse} from '@angular/common/http';
 import type {
@@ -37,9 +36,9 @@ export class Signup {
               private router: Router,) {
     this.signupForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.pattern(/^(?=.*d)(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z]{8,}$/)]],
-      passwordRepeat: ['', [Validators.required, Validators.pattern(/^(?=.*d)(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z]{8,}$/)]],
-      agree: [false, [Validators.requiredTrue]],
+      password: ['', [Validators.required, Validators.pattern(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z]{8,}$/)]],
+      passwordRepeat: ['', [Validators.required, Validators.pattern(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z]{8,}$/)]],
+      agree: [false, [Validators.required]],
     });
   }
 

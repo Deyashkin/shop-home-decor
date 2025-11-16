@@ -17,9 +17,26 @@
           <div class="favorite-product-name">{{ product.name }}</div>
           <div class="favorite-product-price">{{ product.price }} BYN</div>
           <div class="favorite-product-action">
-            <button class="button" routerLink="/product/{{product.url}}">
-              Открыть
+
+            @if (!isProductInCart(product.id)) {
+            <button class="button" (click)="addToCart(product.id)">
+              В корзину
             </button>
+            }
+
+            @if (isProductInCart(product.id)) {
+              <div class="favorite-product-in-cart">
+                <count-selector
+                  [count]="getProductCountInCart(product.id)"
+                  (onCountChange)="updateCartCount(product.id, $event)"
+                  class="favorite-count-selector">
+                </count-selector>
+                <button class="button button-in-cart" disabled>
+                  В корзине
+                </button>
+              </div>
+            }
+
           </div>
           <div class="favorite-product-remove" (click)="removeFromFavoritItems(product.id)">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">

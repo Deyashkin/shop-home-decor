@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {Observable} from 'rxjs';
-import type {CategoryType} from '../../../types/category.type';
 import {environment} from '../../../environments/environment';
 import type {ProductType} from '../../../types/product.type';
 import type {ProductResponseType} from '../../../types/product-response.type';
@@ -22,6 +21,10 @@ export class ProductService {
     return this.http.get<ProductResponseType>(environment.api + 'products', {
       params: params
     });
+  }
+
+  searchProducts(query: string): Observable<ProductType[]> {
+    return this.http.get<ProductType[]>(environment.api + 'products/search?query=' + query);
   }
 
   getProduct(url: string): Observable<ProductType> {

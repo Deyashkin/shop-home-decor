@@ -22,13 +22,10 @@
                 <a routerLink="/catalog">Каталог</a>
               </li>
               <li>
-                <a>Отзывы</a>
+                <a routerLink="/" fragment="reviews">Отзывы</a>
               </li>
               <li>
-                <a>Доставка</a>
-              </li>
-              <li>
-                <a>Оплата</a>
+                <a routerLink="/" fragment="delivery">Доставка и оплата</a>
               </li>
             </ul>
           </nav>
@@ -81,13 +78,15 @@
             </a>
             <mat-menu #menu="matMenu">
               <button mat-menu-item>
-                <a  routerLink="/profile">Профиль</a>
+                <a routerLink="/profile">Профиль</a>
               </button>
               <button mat-menu-item>
                 <span (click)="logout()">Выйти</span>
               </button>
             </mat-menu>
           }
+
+          @if (isLogged) {
           <a routerLink="/favorite">
             <svg
               width="24"
@@ -102,6 +101,8 @@
               />
             </svg>
           </a>
+          }
+
           <a routerLink="/cart">
             <svg
               width="24"
@@ -153,10 +154,20 @@
           </nav>
         </div>
         <div class="header-bottom-search">
-          <input
-            type="text"
-            placeholder="Начните искать"
-          >
+          <input type="text" placeholder="Начните искать" [formControl]="searchField">
+
+          @if (showedSearch && products && products.length > 0) {
+            <div class="search-products">
+              @for (product of products; track $index) {
+                <div class="search-product" (click)="selectProduct(product.url)">
+                  <div class="search-product-image"
+                       [style.background-image]="'url(' + serverStaticPath + product.image + ')'">
+                  </div>
+                  <div class="search-product-name">{{ product.name }}</div>
+                </div>
+              }
+            </div>
+          }
         </div>
       </div>
     </div>

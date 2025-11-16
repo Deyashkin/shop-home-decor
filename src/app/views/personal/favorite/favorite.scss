@@ -67,6 +67,29 @@
           color: var(--gray-text-color);
         }
 
+        .favorite-product-action {
+          .favorite-product-in-cart {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+
+            .favorite-count-selector {
+              // Стили для счетчика в избранном
+            }
+
+            .button-in-cart {
+              margin-left: 20px;
+              background: #B6D5B9; // Светло-зеленый для "В корзине"
+              color: #456F49;
+              cursor: default;
+
+              &:hover {
+                background: #B6D5B9; // Сохраняем тот же цвет при hover
+              }
+            }
+          }
+        }
+
         .favorite-product-action button {
           width: 160px;
         }
